@@ -20,7 +20,7 @@ A simple bash script, using this we avoid executing memorizer enable, disable, a
 @Noah this section is all yours
 
 ## Next steps
-Reading the kmap files that are in the kmaps folder: https://gitlab.com/fierce-lab/memorizer/-/blob/master/src/post-analysis/CAPMAP.py
+Reading the kmap files that are in the [kmaps](kmaps/) folder: https://gitlab.com/fierce-lab/memorizer/-/blob/master/src/post-analysis/CAPMAP.py
 Other applications are currently being discussed.
 
 ### Other tools
