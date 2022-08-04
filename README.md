@@ -10,6 +10,7 @@ Note from Noah: So the main issue with the Docker container is that the memorize
 
 ## Running memorizer
 The first thing to note is that there needs to be a slight modification in the `./scripts/memorizer/run_qemu.sh` file: the keyword `memalloc=$MEM_MEMORIZER...` should instead be `memalloc_size=[some constant]`. This change is what allows the memorizer to have more than the default amount of memory allocated, without which the user might experience quite a few kernel panics due to memorizer running out of memory. Another change to that script if running the QEMU instance inside of a VM is to add `pmu=off` to `host`, making the line `host,pmu=off`. Now why exactly this fixes some issues with QEMU inside a VM? Not sure but it'll save you a headache. Now that the script is fixed, you can follow the quick start guide found above. If running the QEMU instance of memorizer inside a VM, remember to have KVM enabled for the VM otherwise QEMU will not boot.
+
 ### Memorizer Fields
 The memorizer fields on the actual github are a tad outdated. After scrounging through some of the code I was able to put this together for the KMAP outputs:
 Objects: alloc_ip,alloc_pid,va,size,alloc_time,free_time,free_ip,allocator,process,slab_cache
@@ -30,6 +31,7 @@ Subjects:
 	instr_ip - ip that read/write from this object
 	writes - number of writes
 	reads - number of reads
+
 ### Useful commands:
 Please check the [scripts](scripts/) folder for the scripts we have written so far.
 
@@ -44,10 +46,14 @@ We created a Python script to work in tandem with the Linux Test Project. Simply
     -g, --granularity: the number of tests to run before producing a kmap (default=1)
     -r, --random: randomizes the test order. makes more sense for larger granularities
     -n, --number: total number of tests to run before exiting the script
-Hopefully this script makes your life easier when collcting data using LTP
+Hopefully this script makes your life easier when collcting data using LTP.
 
 ### Analyzing Memorizer Output:
 As you may have noticed, the memorizer provides a whole wealth of data that can be hard for the human eye to analyze by itself. That is why we have taken a couple of directions to create ways to make this data more digestable. The first tool is that we have created a python script that takes in a kmap and creates a force-directed graph of the kmap. Nodes represent unique instruction pointers which are some kind of alloc_ip (red) or some kind of read/write operation (blue). The edges between these nodes are always reads/write nodes that read/write on a certain allocated object. The other analysis tool that we have been working on is utilizing a GNN (graph neural network) to see if we can identify malicious programs within it, though it is cuurrently in a primitive state and needs some improvement.
+
+### GNNs - A start
+Check out a custom GNN-esque Machine Learning implementation [here](kmapGraph.py). Also works: try to fit the kmap data to an open-source GNN implementation (however we were not very successful with this, hence the custum GNN implementation.
+
 ## Next steps
 Reading the kmap files that are in the [kmaps](kmaps/) folder: https://gitlab.com/fierce-lab/memorizer/-/blob/master/src/post-analysis/CAPMAP.py
 Other applications are currently being discussed.
