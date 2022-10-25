@@ -43,6 +43,37 @@ def initializeLogger():
     logger = logging.getLogger()
     return
 
+def enableMemorizer():
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/cfg_log_on"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/cfgmap"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/stack_trace_on"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/clear_dead_objs"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/clear_printed_list"
+    retVal = subprocess.call(cmd,shell=True)
+
+    #turn the memorizer on
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/memorizer_log_access"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 1 > /sys/kernel/debug/memorizer/memorizer_enabled"
+    retVal = subprocess.call(cmd,shell=True)}
+def produceKMAP(comm):
+    today = date.today()
+    cmd = "echo 0 > /sys/kernel/debug/memorizer/memorizer_log_access"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd = "echo 0 > /sys/kernel/debug/memorizer/memorizer_enabled"
+    retVal = subprocess.call(cmd,shell=True)
+
+    cmd= "cp /sys/kernel/debug/memorizer/kmap " + comm + "_" + today.strftime("%m_%d_%Y") + ".kmap"
 def runTest(testGroup, subTest):
     global testGranularity
     global runBeforePrint
@@ -120,6 +151,7 @@ def main():
     parser.add_argument('-o','--omit',action="extend",nargs="+",type=str,help="Specific tests that you don't want run")
     parser.add_argument("-p","--path",type=str,help="path to the ./ltp installation, otherwise assumes in working directory")
     parser.add_argument("-r","--random",action='store_true',help="randomize order in which the tests are run")
+    parser.add_argument("-c","--command",type=str,help="command that you wish to run")
     parser.add_argument("-n","--number",help="the number of tests to run")
     parser.add_argument("-g","--granularity",type=int,help="the number of tests to run before producing a kmap (DEFAULT=1)")
     args = parser.parse_args()
@@ -161,6 +193,14 @@ def main():
         runBeforePrint = 0
     else:
         runBeforePrint=0
+
+    #just runs a single command
+    if args.command != None:
+        clearMemorizer()
+        enableMemorizer()
+        retVal = subprocess.call(args.command,shell=True)
+        produceKMAP(args.command)
+        return 0
     print(path,testGroups,ignore)
     if os.path.exists(path) != 1:
         print("You don't have ltp installed or the path is incorrect!")
